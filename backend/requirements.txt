@@ -1,0 +1,48 @@
+# ==============================================================
+# AI Learning Platform — Backend Dependencies
+# Python 3.12 compatible
+# Install order:
+#   1. pip install cmake
+#   2. pip install dlib  (or use prebuilt wheel for 3.12)
+#   3. pip install face_recognition
+#   4. pip install -r requirements.txt
+# ==============================================================
+
+# ── Web Framework ──────────────────────────────────────────────
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+python-multipart==0.0.9
+
+# ── Database ───────────────────────────────────────────────────
+sqlalchemy==2.0.30
+aiosqlite==0.20.0
+alembic==1.13.1
+greenlet==3.0.3
+
+# ── Data Validation ────────────────────────────────────────────
+pydantic==2.7.1
+pydantic-settings==2.3.1
+
+# ── Authentication ─────────────────────────────────────────────
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+
+# ── AI / OpenAI ────────────────────────────────────────────────
+openai==1.35.3
+
+# ── Face Recognition ───────────────────────────────────────────
+# Install dlib manually BEFORE running pip install -r requirements.txt
+# See README for Python 3.12 instructions
+face_recognition==1.3.0
+numpy==1.26.4
+Pillow==10.3.0
+opencv-python==4.10.0.84
+
+# ── Utilities ──────────────────────────────────────────────────
+python-dotenv==1.0.1
+httpx==0.27.0
+
+# ── Testing ────────────────────────────────────────────────────
+pytest==8.2.2
+pytest-asyncio==0.23.7
