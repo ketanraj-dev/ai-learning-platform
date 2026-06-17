@@ -8,7 +8,9 @@ export function Navbar() {
   const location = useLocation();
 
   const handleLogout = async () => {
-    try { await authApi.logout(); } catch {}
+    try {
+      await authApi.logout();
+    } catch {}
     logout();
     navigate("/login");
   };
@@ -35,10 +37,24 @@ export function Navbar() {
 
         {/* Nav links */}
         <div className="flex items-center gap-1">
-          <Link to="/dashboard" className={`btn-ghost text-sm ${isActive("/dashboard")}`}>
+          <Link
+            to="/dashboard"
+            className={`btn-ghost text-sm ${isActive("/dashboard")}`}
+          >
             Dashboard
           </Link>
-          <Link to="/analytics" className={`btn-ghost text-sm ${isActive("/analytics")}`}>
+
+          <Link
+            to="/scan"
+            className={`btn-ghost text-sm ${isActive("/scan")}`}
+          >
+            Scan
+          </Link>
+
+          <Link
+            to="/analytics"
+            className={`btn-ghost text-sm ${isActive("/analytics")}`}
+          >
             Analytics
           </Link>
         </div>
@@ -46,14 +62,25 @@ export function Navbar() {
         {/* User menu */}
         <div className="flex items-center gap-3">
           <div className="hidden sm:block text-right">
-            <p className="text-sm font-medium text-slate-200">{user?.name}</p>
-            <p className="text-xs text-slate-500">{user?.email}</p>
+            <p className="text-sm font-medium text-slate-200">
+              {user?.name}
+            </p>
+            <p className="text-xs text-slate-500">
+              {user?.email}
+            </p>
           </div>
-          <div className="w-9 h-9 rounded-full bg-brand-500/20 border border-brand-500/30
-                          flex items-center justify-center text-brand-400 font-semibold text-sm">
+
+          <div
+            className="w-9 h-9 rounded-full bg-brand-500/20 border border-brand-500/30
+                       flex items-center justify-center text-brand-400 font-semibold text-sm"
+          >
             {user?.name?.charAt(0).toUpperCase()}
           </div>
-          <button onClick={handleLogout} className="btn-ghost text-sm text-slate-400">
+
+          <button
+            onClick={handleLogout}
+            className="btn-ghost text-sm text-slate-400"
+          >
             Logout
           </button>
         </div>

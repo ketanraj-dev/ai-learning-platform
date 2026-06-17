@@ -4,7 +4,7 @@ app/api/v1/ai.py
 AI endpoints — chat (streaming), transcription, recommendations.
 """
 
-from fastapi import APIRouter, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import StreamingResponse
 
 from app.api.deps import DB, CurrentUser
@@ -120,3 +120,67 @@ async def get_recommendations(current_user: CurrentUser, db: DB):
     """
     from app.services import analytics_service
     return await analytics_service.get_recommendations(db, current_user.id)
+
+# ════════════════════════════════════════════════════════════════════════
+# OCR endpoint — add this to app/api/v1/ai.py
+# Add the import "Form" to the existing fastapi import line at the top:
+#   from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
+# ════════════════════════════════════════════════════════════════════════
+
+
+@router.post("/ocr")
+async def ocr_extract(
+    current_user: CurrentUser,
+    db: DB,
+    image: UploadFile = File(..., description="Image file (jpg/png/webp)"),
+    explain: bool = Form(False, description="Also generate an AI explanation"),
+):
+    """
+    Extract text from an uploaded image using GPT-4o Vision (OCR).
+
+    Optionally also returns an AI explanation/solution of the extracted text.
+
+    Frontend sends multipart/form-data:
+      - image: the photo file
+      - explain: "true" to also get AICA's explanation
+
+    Returns:
+      { extracted_text: str, explanation: str | null }
+    """
+    image_bytes = await image.read()
+
+    if not image_bytes:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No image data received.",
+        )
+
+    # Determine mime type from filename
+    filename = (image.filename or "image.jpg").lower()
+    if filename.endswith(".png"):
+        mime_type = "image/png"
+    elif filename.endswith(".webp"):
+        mime_type = "image/webp"
+    else:
+        mime_type = "image/jpeg"
+
+    # Extract text
+    extracted_text = await ai_service.extract_text_from_image(image_bytes, mime_type)
+
+    # Optionally explain
+    explanation = None
+    if explain:
+        explanation = await ai_service.explain_extracted_text(extracted_text)
+
+    # Log activity
+    await analytics_repo.log_activity(
+        db=db,
+        user_id=current_user.id,
+        action_type="ocr_scan",
+        metadata={"image_size_bytes": len(image_bytes), "explained": explain},
+    )
+
+    return {
+        "extracted_text": extracted_text,
+        "explanation": explanation,
+    }

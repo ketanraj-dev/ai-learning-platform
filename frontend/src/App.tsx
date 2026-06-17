@@ -8,6 +8,7 @@ import { CoursePage } from "./pages/CoursePage";
 import { QuizPage } from "./pages/QuizPage";
 import { ResultPage } from "./pages/ResultPage";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
+import { ScanPage } from "./pages/ScanPage";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },

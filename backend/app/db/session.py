@@ -39,7 +39,7 @@ settings = get_settings()
 # SQLite needs check_same_thread=False because FastAPI uses multiple threads
 # PostgreSQL doesn't need this — the condition handles it automatically
 connect_args = (
-    {"check_same_thread": False}
+    {"check_same_thread": False, "timeout": 30}
     if "sqlite" in settings.database_url
     else {}
 )
@@ -49,6 +49,20 @@ engine = create_async_engine(
     echo=False,           # Set True to print every SQL query (useful for debugging)
     connect_args=connect_args,
 )
+
+# ── Enable WAL mode for SQLite (allows concurrent reads + writes) ──────────
+# Without this, SQLite locks the whole database during any write,
+# causing "database is locked" errors when multiple requests overlap.
+if "sqlite" in settings.database_url:
+    from sqlalchemy import event
+
+    @event.listens_for(engine.sync_engine, "connect")
+    def _set_sqlite_pragma(dbapi_conn, connection_record):
+        cursor = dbapi_conn.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")      # write-ahead logging
+        cursor.execute("PRAGMA busy_timeout=30000")    # wait 30s instead of failing
+        cursor.execute("PRAGMA synchronous=NORMAL")    # faster writes, still safe
+        cursor.close()
 
 # ── Session Factory ────────────────────────────────────────────────────────
 # AsyncSessionLocal is a FACTORY — calling it creates a new session object.

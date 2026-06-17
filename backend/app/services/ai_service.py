@@ -293,3 +293,126 @@ Be specific to Data Science and AI/ML. Keep it concise and actionable."""
         "focus_topics": [t.topic_tag for t in weak_topics],
         "suggested_difficulty": suggested_difficulty,
     }
+
+# ════════════════════════════════════════════════════════════════════════
+# OCR — Extract text from images using GPT-4o Vision
+# Add this function to the END of app/services/ai_service.py
+# ════════════════════════════════════════════════════════════════════════
+
+import base64
+
+
+async def extract_text_from_image(
+    image_bytes: bytes,
+    mime_type: str = "image/jpeg",
+) -> str:
+    """
+    Extract text from an image using GPT-4o Vision (OCR).
+
+    Reads printed text, handwriting, diagrams, equations, and code
+    from photos of textbook pages, notes, screenshots, or whiteboards.
+
+    Args:
+        image_bytes: raw image file bytes from the upload
+        mime_type:   image format (image/jpeg, image/png, image/webp)
+
+    Returns:
+        Extracted text as a clean string
+
+    Raises:
+        HTTPException 400: empty or invalid image
+        HTTPException 503: OpenAI Vision API error
+    """
+    if len(image_bytes) < 100:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Image too small or empty. Please upload a valid image.",
+        )
+
+    # GPT-4o Vision needs a vision-capable model; gpt-4o-mini supports vision
+    client = get_openai_client()
+
+    # Encode image to base64 data URL
+    b64 = base64.b64encode(image_bytes).decode("utf-8")
+    data_url = f"data:{mime_type};base64,{b64}"
+
+    try:
+        response = await client.chat.completions.create(
+            model=settings.openai_model,  # gpt-4o-mini supports vision
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are an OCR engine. Extract ALL text from the image "
+                        "exactly as written. Preserve line breaks, code formatting, "
+                        "equations, and structure. If the image contains a math or "
+                        "coding problem, transcribe it precisely. Output ONLY the "
+                        "extracted text with no commentary, no markdown fences."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "Extract all text from this image:"},
+                        {"type": "image_url", "image_url": {"url": data_url}},
+                    ],
+                },
+            ],
+            max_tokens=1500,
+            temperature=0,  # deterministic — exact transcription
+        )
+        extracted = response.choices[0].message.content or ""
+        logger.info("OCR extracted %d chars from %d byte image", len(extracted), len(image_bytes))
+        return extracted.strip()
+
+    except OpenAIError as e:
+        logger.error("OCR vision error: %s", str(e))
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Text extraction temporarily unavailable.",
+        )
+
+
+async def explain_extracted_text(extracted_text: str) -> str:
+    """
+    Take OCR-extracted text and have AICA explain or solve it.
+
+    Used right after extract_text_from_image() so the student gets
+    both the text AND an explanation in one flow.
+
+    Args:
+        extracted_text: the text returned by OCR
+
+    Returns:
+        AICA's explanation as a string
+    """
+    if not extracted_text.strip():
+        return "No text was found in the image to explain."
+
+    client = get_openai_client()
+
+    prompt = (
+        f"A student scanned this content:\n\n{extracted_text}\n\n"
+        "Explain it clearly. If it's a question or problem, solve it step by step. "
+        "If it's a concept, explain it simply with an example. "
+        "Keep it focused on Data Science / AI-ML learning."
+    )
+
+    try:
+        response = await client.chat.completions.create(
+            model=settings.openai_model,
+            messages=[
+                {"role": "system", "content": TUTOR_SYSTEM_PROMPT},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=1024,
+            temperature=0.7,
+        )
+        return response.choices[0].message.content or ""
+
+    except OpenAIError as e:
+        logger.error("OCR explain error: %s", str(e))
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="AI explanation temporarily unavailable.",
+        )
