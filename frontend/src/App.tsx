@@ -29,6 +29,7 @@ export default function App() {
           <Route path="/quiz/:courseId" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
           <Route path="/result" element={<ProtectedRoute><ResultPage /></ProtectedRoute>} />
           <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
+          <Route path="/scan"      element={<ProtectedRoute><ScanPage /></ProtectedRoute>} />
 
           {/* Default */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
