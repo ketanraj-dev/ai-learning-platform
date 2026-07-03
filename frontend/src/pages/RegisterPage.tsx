@@ -6,11 +6,23 @@ import { FaceCapture } from "../components/auth/FaceCapture";
 
 function LogoMark() {
   return (
-    <svg width="36" height="36" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="28" height="28" rx="7" fill="#E8843C" />
-      <rect x="6"  y="16" width="4" height="7"  rx="1.5" fill="white" />
-      <rect x="12" y="11" width="4" height="12" rx="1.5" fill="white" />
-      <rect x="18" y="7"  width="4" height="16" rx="1.5" fill="rgba(255,255,255,0.6)" />
+    <svg width="36" height="43" viewBox="0 0 146 176" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g stroke="#FFC72C" strokeWidth="7" strokeLinecap="round">
+        <line x1="95" y1="8" x2="88" y2="30" />
+        <line x1="55" y1="14" x2="66" y2="34" />
+        <line x1="22" y1="36" x2="40" y2="50" />
+        <line x1="6" y1="72" x2="28" y2="76" />
+        <line x1="14" y1="108" x2="34" y2="98" />
+      </g>
+      <circle cx="88" cy="80" r="58" fill="#FFC72C" />
+      <path
+        d="M100 32 C78 26, 56 40, 58 62 C59 78, 74 88, 90 80 C99 75, 98 63, 88 61"
+        fill="none" stroke="#F8FAFC" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"
+      />
+      <path d="M88 61 C82 74, 84 92, 100 104" fill="none" stroke="#F8FAFC" strokeWidth="7" strokeLinecap="round" />
+      <path d="M62 118 L118 118" fill="none" stroke="#F8FAFC" strokeWidth="7" strokeLinecap="round" />
+      <path d="M58 132 L128 132" fill="none" stroke="#F8FAFC" strokeWidth="7" strokeLinecap="round" />
+      <path d="M56 146 L140 168" fill="none" stroke="#F8FAFC" strokeWidth="7" strokeLinecap="round" />
     </svg>
   );
 }
@@ -54,7 +66,7 @@ export function RegisterPage() {
         <div className="relative">
           <div className="flex items-center gap-3 mb-16">
             <LogoMark />
-            <span className="font-display font-semibold text-lg text-slate-100">LearnAI</span>
+            <span className="font-display font-semibold text-lg text-slate-100">Smart Education</span>
           </div>
 
           <h2 className="font-display text-[2.6rem] font-bold text-slate-100 leading-[1.1] mb-5">
@@ -81,7 +93,7 @@ export function RegisterPage() {
           {/* Mobile logo */}
           <div className="flex items-center gap-2.5 mb-10 lg:hidden">
             <LogoMark />
-            <span className="font-display font-semibold text-slate-100">LearnAI</span>
+            <span className="font-display font-semibold text-slate-100">Smart Education</span>
           </div>
 
           <h1 className="font-display text-2xl font-bold text-slate-100 mb-1">Create account</h1>
